@@ -1,7 +1,4 @@
-﻿# AppCoreKit README.md
-
-
-# AppCoreKit
+﻿# AppCoreKit
 
 A scalable reusable iOS base architecture for UIKit and SwiftUI projects.
 
