@@ -1,7 +1,4 @@
-﻿# AppCoreKit README.md
-
-````md
-# AppCoreKit
+﻿# AppCoreKit
 
 A scalable reusable iOS base architecture for UIKit and SwiftUI projects.
 
@@ -28,7 +25,7 @@ Supports:
 - Dependency Injection
 - Offline Ready Architecture
 
----
+
 
 # Features
 
