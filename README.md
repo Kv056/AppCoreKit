@@ -115,6 +115,319 @@ AppCoreKit.xcodeproj
 
 ---
 
+````md
+---
+
+# Endpoint
+
+`Endpoint` is used to define API configuration in a clean reusable way.
+
+Instead of manually creating `URLRequest` everywhere, each API is declared as an `Endpoint`.
+
+# How To Create Endpoint
+
+Each API module can have its own endpoint file.
+
+Recommended structure:
+
+```text
+Modules
+├── Auth
+│   └── Endpoints
+│       └── AuthEndpoint.swift
+│
+├── User
+│   └── Endpoints
+│       └── UserEndpoint.swift
+```
+
+---
+
+# Example 1 — GET API
+
+## UserEndpoint.swift
+
+```swift
+import Foundation
+
+enum UserEndpoint:
+    Endpoint {
+
+    case users
+
+    var path: String {
+
+        switch self {
+
+        case .users:
+
+            return "/users"
+        }
+    }
+
+    var method:
+        HTTPMethod {
+
+        switch self {
+
+        case .users:
+            return .GET
+        }
+    }
+
+    var headers:
+        [String : String]? {
+
+        nil
+    }
+
+    var queryItems:
+        [URLQueryItem]? {
+
+        nil
+    }
+
+    var body: Data? {
+
+        nil
+    }
+}
+```
+
+---
+
+# How To Use Endpoint
+
+```swift
+let users: [User] =
+
+    try await APIClient()
+        .request(
+            UserEndpoint.users,
+            responseType:
+                [User].self
+        )
+```
+
+---
+
+# Example 2 — GET API With Query Parameters
+
+## ProductEndpoint.swift
+
+```swift
+import Foundation
+
+enum ProductEndpoint:
+    Endpoint {
+
+    case products(
+        page: Int
+    )
+
+    var path: String {
+
+        "/products"
+    }
+
+    var method:
+        HTTPMethod {
+
+        .GET
+    }
+
+    var headers:
+        [String : String]? {
+
+        nil
+    }
+
+    var queryItems:
+        [URLQueryItem]? {
+
+        switch self {
+
+        case .products(let page):
+
+            return [
+
+                URLQueryItem(
+                    name: "page",
+                    value:
+                        "\\(page)"
+                )
+            ]
+        }
+    }
+
+    var body: Data? {
+
+        nil
+    }
+}
+```
+
+---
+
+# Usage
+
+```swift
+let response:
+    PaginatedResponse<Product> =
+
+    try await APIClient()
+        .request(
+            ProductEndpoint
+                .products(page: 1),
+            responseType:
+                PaginatedResponse<Product>.self
+        )
+```
+
+---
+
+# Example 3 — POST API
+
+## LoginRequest.swift
+
+```swift
+import Foundation
+
+struct LoginRequest:
+    Encodable {
+
+    let email: String
+
+    let password: String
+}
+```
+
+---
+
+# AuthEndpoint.swift
+
+```swift
+import Foundation
+
+enum AuthEndpoint:
+    Endpoint {
+
+    case login(
+        request:
+            LoginRequest
+    )
+
+    var path: String {
+
+        switch self {
+
+        case .login:
+
+            return "/login"
+        }
+    }
+
+    var method:
+        HTTPMethod {
+
+        switch self {
+
+        case .login:
+
+            return .POST
+        }
+    }
+
+    var headers:
+        [String : String]? {
+
+        [
+
+            "Content-Type":
+                "application/json"
+        ]
+    }
+
+    var queryItems:
+        [URLQueryItem]? {
+
+        nil
+    }
+
+    var body: Data? {
+
+        switch self {
+
+        case .login(let request):
+
+            return try? JSONEncoder()
+                .encode(request)
+        }
+    }
+}
+```
+
+---
+
+# Usage
+
+```swift
+let request =
+    LoginRequest(
+
+        email:
+            "test@gmail.com",
+
+        password:
+            "123456"
+    )
+
+let response:
+    LoginResponse =
+
+    try await APIClient()
+        .request(
+            AuthEndpoint
+                .login(
+                    request: request
+                ),
+            responseType:
+                LoginResponse.self
+        )
+```
+
+---
+
+# Recommended Best Practices
+
+- Create separate endpoint file per module
+- Keep endpoint logic lightweight
+- Avoid adding business logic inside endpoints
+- Use request models for POST/PUT APIs
+- Use queryItems for query parameters
+- Keep API paths centralized
+
+---
+
+# Recommended Endpoint Structure
+
+```text
+Modules
+├── Auth
+│   ├── Models
+│   ├── Endpoints
+│   ├── Repository
+│   └── ViewModel
+│
+├── User
+│   ├── Models
+│   ├── Endpoints
+│   ├── Repository
+│   └── ViewModel
+```
+
+
+
 # UIKit MVC Example
 
 ## ViewController
